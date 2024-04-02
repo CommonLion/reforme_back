@@ -12,7 +12,7 @@ import lombok.Setter;
 public class Image {
 
     @Id @GeneratedValue
-    @Column(name = "image_name")
+    @Column(name = "image_id")
     private Long id;
 
     private String origImageName;
