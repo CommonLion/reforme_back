@@ -16,7 +16,7 @@ public class User {
     @Column(name = "user_id")
     private String id;
 
-    private String passeord;
+    private String password;
 
     private String nickname;
 }

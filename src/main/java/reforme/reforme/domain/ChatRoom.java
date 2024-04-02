@@ -5,8 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Getter
-@Setter
+@Getter @Setter
 public class ChatRoom {
 
     @Id
@@ -15,5 +14,6 @@ public class ChatRoom {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
 }
