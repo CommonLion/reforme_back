@@ -20,6 +20,7 @@ public class Chat {
     private String massage;
 
     @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "image_id")
     private Image image;
 
     private LocalDateTime sendedDateTime;
