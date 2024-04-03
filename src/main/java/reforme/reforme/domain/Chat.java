@@ -17,6 +17,10 @@ public class Chat {
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chat_room_id")
+    private ChatRoom chatRoom;
+
     private String massage;
 
     @OneToOne(fetch = FetchType.LAZY)
