@@ -17,7 +17,5 @@ public class Image {
 
     private String origImageName;
 
-    private String imageName;
-
     private String imagePath;
 }

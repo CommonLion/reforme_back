@@ -1,5 +1,5 @@
 package reforme.reforme.domain;
 
-public enum Category {
+public enum MeCategory {
     TOP, BOTTOM, OUTWEAR, BAG, ETC
 }

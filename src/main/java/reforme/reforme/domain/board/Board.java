@@ -3,7 +3,6 @@ package reforme.reforme.domain.board;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import reforme.reforme.domain.Category;
 import reforme.reforme.domain.Image;
 import reforme.reforme.domain.User;
 
@@ -34,8 +33,4 @@ public abstract class Board {
     private LocalDateTime createdDateTime;
 
     private LocalDateTime modifiedDateTime;
-
-    @Enumerated(EnumType.STRING)
-    private Category category; // 카테고리 [TOP, BOTTOM, OUTWEAR, BAG, ETC]
-
 }
