@@ -1,9 +1,9 @@
-package reforme.reforme.domain;
+package reforme.reforme.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import reforme.reforme.domain.board.Board;
+import reforme.reforme.entity.board.Board;
 
 import java.time.LocalDateTime;
 
