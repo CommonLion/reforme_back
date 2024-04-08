@@ -27,7 +27,7 @@ public abstract class Board {
 
     private String body;
 
-    @OneToMany(mappedBy = "image", cascade = CascadeType.ALL)
+    @OneToMany
     private List<Image> images = new ArrayList<>();
 
     private LocalDateTime createdDateTime;
