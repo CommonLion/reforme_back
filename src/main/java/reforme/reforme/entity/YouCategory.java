@@ -1,4 +1,4 @@
-package reforme.reforme.domain;
+package reforme.reforme.entity;
 
 public enum YouCategory {
     CLOTHES, BAG, SHOES, ETC

@@ -1,10 +1,10 @@
-package reforme.reforme.domain.board;
+package reforme.reforme.entity.board;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import reforme.reforme.domain.Image;
-import reforme.reforme.domain.User;
+import reforme.reforme.entity.Image;
+import reforme.reforme.entity.User;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -27,7 +27,7 @@ public abstract class Board {
 
     private String body;
 
-    @OneToMany(mappedBy = "image", cascade = CascadeType.ALL)
+    @OneToMany
     private List<Image> images = new ArrayList<>();
 
     private LocalDateTime createdDateTime;

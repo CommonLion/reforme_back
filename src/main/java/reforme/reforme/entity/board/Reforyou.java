@@ -1,11 +1,11 @@
-package reforme.reforme.domain.board;
+package reforme.reforme.entity.board;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.Getter;
 import lombok.Setter;
-import reforme.reforme.domain.YouCategory;
+import reforme.reforme.entity.YouCategory;
 
 @Entity
 @Getter @Setter

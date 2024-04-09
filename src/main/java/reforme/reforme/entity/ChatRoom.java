@@ -1,4 +1,4 @@
-package reforme.reforme.domain;
+package reforme.reforme.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
