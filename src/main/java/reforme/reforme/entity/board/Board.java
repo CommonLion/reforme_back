@@ -3,6 +3,7 @@ package reforme.reforme.entity.board;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import reforme.reforme.entity.Comment;
 import reforme.reforme.entity.Image;
 import reforme.reforme.entity.User;
 
@@ -29,6 +30,9 @@ public abstract class Board {
 
     @OneToMany
     private List<Image> images = new ArrayList<>();
+
+    @OneToMany
+    private List<Comment> comments = new ArrayList<>();
 
     private LocalDateTime createdDateTime;
 
