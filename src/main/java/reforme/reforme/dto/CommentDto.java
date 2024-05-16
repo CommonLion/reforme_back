@@ -8,19 +8,16 @@ import reforme.reforme.entity.Comment;
 @Setter
 public class CommentDto {
 
-    private String commentUsername;
+    private String nickname;
 
     private String content;
 
     private Boolean secret;
 
-    private String createdTime;
-
     public CommentDto(Comment comment){
+        this.nickname = comment.getUser().getNickname();
         this.content = comment.getContent();
-        this.commentUsername = comment.getUser().getNickname();
         this.secret = comment.getSecret();
-        this.createdTime = String.valueOf(comment.getCreatedTime());
     }
 
 }

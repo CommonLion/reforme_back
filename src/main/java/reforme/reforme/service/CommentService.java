@@ -21,8 +21,6 @@ import java.util.Optional;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final ReformeRepository reformeRepository;
-    private final ReforyouRepository reforyouRepository;
 
     public void saveReformeComment(String content, Boolean secret, String userid, Long boardId){
         Comment comment = new Comment();
@@ -86,38 +84,6 @@ public class CommentService {
             // 주어진 ID에 해당하는 댓글이 없을 때 예외 처리
             throw new IllegalArgumentException("주어진 ID에 해당하는 댓글을 찾을 수 없습니다.");
         }
-    }
-
-    public List<CommentDto> findByIdMeComment(Long boardId){
-
-        var reforme = reformeRepository.findById(boardId);
-        List<CommentDto> comments = new ArrayList<>();
-        if(reforme.isPresent()){
-            var comment = reforme.get().getComments();
-            for(Comment comment1 : comment){
-                CommentDto commentDto = new CommentDto(comment1);
-                comments.add(commentDto);
-            }
-        }
-
-        return comments;
-
-    }
-
-    public List<CommentDto> findByIdYouComment(Long boardId){
-
-        var reforyou = reforyouRepository.findById(boardId);
-        List<CommentDto> comments = new ArrayList<>();
-        if(reforyou.isPresent()){
-            var comment = reforyou.get().getComments();
-            for(Comment comment1 : comment){
-                CommentDto commentDto = new CommentDto(comment1);
-                comments.add(commentDto);
-            }
-        }
-
-        return comments;
-
     }
 
 }
