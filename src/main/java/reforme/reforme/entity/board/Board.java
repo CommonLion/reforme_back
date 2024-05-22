@@ -1,7 +1,9 @@
 package reforme.reforme.entity.board;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import reforme.reforme.entity.Comment;
 import reforme.reforme.entity.Image;
@@ -14,6 +16,8 @@ import java.util.List;
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Getter @Setter
+@AllArgsConstructor
+@NoArgsConstructor
 public abstract class Board {
 
     @Id @GeneratedValue
