@@ -31,7 +31,7 @@ public class UserService implements UserDetailsService {
     public String join(UserDto userDto) {
 
         User user = new User();
-        user.setId(userDto.getId());
+        user.setId(userDto.getUserId());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         user.setNickname(userDto.getNickname());
 
