@@ -8,7 +8,7 @@ import lombok.Setter;
 public class UserDto {
 
     @NotEmpty(message = "회원 아이디는 필수입니다.")
-    private String id;
+    private String userId;
 
     @NotEmpty(message = "회원 비밀번호는 필수입니다.")
     private String password;
