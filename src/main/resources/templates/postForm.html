@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 작성</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" />
+</head>
+<body>
+<div class="container">
+    <form action="/reforyou/board" method="post" enctype="multipart/form-data">
+        <label for="title">제목</label>
+        <input type="text" id="title" name="title" placeholder="제목을 입력하세요" maxlength="30">
+
+        <label for="content">내용</label>
+        <textarea id="content" name="content" placeholder="내용을 입력하세요" rows="4" maxlength="300"></textarea>
+
+        <div class="file-upload">
+            <!-- 파일 업로드 처리를 위한 버튼, 실제 기능은 JavaScript와 백엔드 로직을 통해 구현됩니다 -->
+            <button type="button" th:onclick="'removeFile();'">-</button>
+            <button type="button" th:onclick="'addFile();'">+</button>
+            <button type="button" th:onclick="'addFile();'">+</button>
+            <button type="button" th:onclick="'addFile();'">+</button>
+        </div>
+
+        <button type="submit">확인</button>
+    </form>
+</div>
+
+<script th:src="@{/js/script.js}"></script>
+</body>
+</html>
