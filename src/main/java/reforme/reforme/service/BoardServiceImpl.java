@@ -7,6 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import reforme.reforme.dto.ResponseBody;
 import reforme.reforme.entity.MeCategory;
 import reforme.reforme.entity.YouCategory;
 import reforme.reforme.entity.Image;
@@ -41,62 +42,79 @@ public class BoardServiceImpl implements BoardService {
     private final ImageRepository imageRepository;
 
     @Override
-    public ResponseEntity createBoard(BoardDto boardDto, MultipartFile[] images, String repositoryType) {
+    public ResponseBody<?> createBoard(BoardDto boardDto, MultipartFile[] images, String repositoryType) {
         //필요하면 매개변수에 Authentication auth를 추가해서 로그인 정보를 받아옴녀 좋을 것 같은데..
         //auth.getUserId 혹은 auth.getId해서 가져오면 될듯
         //단, 이렇게 할라면 프론트가 확보되어야 확인 할 수 있을듯. postman 요청으로 로그인 정보를 보낼 수 없음.
         //그리고 내가 따로 auth를 추가적으로 구현해야하는 부분이 있는지 알아봐야함
         String userId = boardDto.getUserId();
         if (userId == null || userId.trim().isEmpty()) {
-            return new ResponseEntity<>("UserId가 누락되었습니다", HttpStatus.BAD_REQUEST);
+            return new ResponseBody<>(HttpStatus.BAD_REQUEST.value(), "UserId가 누락되었습니다");
         }
-        List<User> user = userRepository.findById(userId); // 이게 필요 없다.
+        List<User> user = userRepository.findById(boardDto.getUserId());
+        //이부분. 오류 날수 도 있음.
         if (user.isEmpty()) {
-            return new ResponseEntity<>("사용자를 찾을 수 없습니다", HttpStatus.NOT_FOUND);
+            return new ResponseBody<>(HttpStatus.NOT_FOUND.value(), "사용자를 찾을 수 없습니다");
         }
 
-        User userEntity = user.get(0); //이게 맞나
+        //이부분도 오류 날 수 있음.
+        User userEntity = user.get(0);
         List<Image> savedImages = saveImages(images);
 
         //캐스팅하면 오류 많이 생긴다고해서 그냥 이렇게 따로 만듬. 뭔가 구리긴함.
-        if (repositoryType.equals("reforyou")) {
-            Reforyou reforyouBoard = new Reforyou();
-            reforyouBoard.setTitle(boardDto.getTitle());
-            reforyouBoard.setBody(boardDto.getBody());
-            reforyouBoard.setCreatedDateTime(LocalDateTime.now());
-            reforyouBoard.setModifiedDateTime(LocalDateTime.now());
-            reforyouBoard.setUser(userEntity);
-            reforyouBoard.setCategory(YouCategory.valueOf(boardDto.getCategory()));
-            reforyouBoard.setImages(savedImages);
-            reforyouRepository.save(reforyouBoard);
-            return new ResponseEntity("success", HttpStatus.OK);
-
-        } else if (repositoryType.equals("reforme")) {
-            Reforme reformeBoard = new Reforme();
-            reformeBoard.setTitle(boardDto.getTitle());
-            reformeBoard.setBody(boardDto.getBody());
-            reformeBoard.setCreatedDateTime(LocalDateTime.now());
-            reformeBoard.setModifiedDateTime(LocalDateTime.now());
-            reformeBoard.setUser(userEntity);
-            reformeBoard.setCategory(MeCategory.valueOf(boardDto.getCategory()));
-            reformeBoard.setImages(savedImages);
-            reformeRepository.save(reformeBoard);
-            return new ResponseEntity("success", HttpStatus.OK);
-        } else {
-            return new ResponseEntity("Invalid repository type", HttpStatus.BAD_REQUEST);
+        try {
+            if (repositoryType.equals("reforyou")) {
+                Reforyou reforyouBoard = createReforyou(boardDto, userEntity, savedImages);
+                reforyouRepository.save(reforyouBoard);
+            } else if (repositoryType.equals("reforme")) {
+                Reforme reformeBoard = createReforme(boardDto, userEntity, savedImages);
+                reformeRepository.save(reformeBoard);
+            } else {
+                return new ResponseBody<>(HttpStatus.BAD_REQUEST.value(), "Invalid repository type");
+            }
+            return new ResponseBody<>(HttpStatus.OK.value(), "게시글이 성공적으로 생성되었습니다.");
+        } catch (Exception e) {
+            return new ResponseBody<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "게시글 생성 중 오류가 발생하였습니다");
         }
+    }
 
+    private Reforyou createReforyou(BoardDto boardDto, User user, List<Image> images) {
+        Reforyou reforyouBoard = new Reforyou();
+        reforyouBoard.setTitle(boardDto.getTitle());
+        reforyouBoard.setBody(boardDto.getBody());
+        reforyouBoard.setCreatedDateTime(LocalDateTime.now());
+        reforyouBoard.setModifiedDateTime(LocalDateTime.now());
+        reforyouBoard.setUser(user);
+        reforyouBoard.setCategory(YouCategory.valueOf(boardDto.getCategory()));
+        reforyouBoard.setImages(images);
+        return reforyouBoard;
+    }
+
+    private Reforme createReforme(BoardDto boardDto, User user, List<Image> images) {
+        Reforme reformeBoard = new Reforme();
+        reformeBoard.setTitle(boardDto.getTitle());
+        reformeBoard.setBody(boardDto.getBody());
+        reformeBoard.setCreatedDateTime(LocalDateTime.now());
+        reformeBoard.setModifiedDateTime(LocalDateTime.now());
+        reformeBoard.setUser(user);
+        reformeBoard.setCategory(MeCategory.valueOf(boardDto.getCategory()));
+        reformeBoard.setImages(images);
+        return reformeBoard;
     }
 
     //게시판 업데이트
     @Override
-    public ResponseEntity updateBoard(Long boardId, BoardUpdateDto updateDto, MultipartFile[] images, String repositoryType) {
+    public ResponseBody<?> updateBoard(Long boardId, BoardUpdateDto updateDto, MultipartFile[] images, String repositoryType) {
         // 게시글 정보 업데이트
         Board existingBoard = null;
-        if (repositoryType.equals("reforyou")) {
-            existingBoard = reforyouRepository.findById(boardId).orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
-        } else if (repositoryType.equals("reforme")) {
-            existingBoard = reformeRepository.findById(boardId).orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+        try {
+            if (repositoryType.equals("reforyou")) {
+                existingBoard = reforyouRepository.findById(boardId).orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+            } else if (repositoryType.equals("reforme")) {
+                existingBoard = reformeRepository.findById(boardId).orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+            }
+        }catch (Exception e) {
+            return new ResponseBody<>(HttpStatus.NOT_FOUND.value(), e.getMessage());
         }
 
         existingBoard.setTitle(updateDto.getTitle());
@@ -131,40 +149,49 @@ public class BoardServiceImpl implements BoardService {
             reformeRepository.save(reformeBoard);
         }
 
-        return ResponseEntity.ok().body("게시글이 성공적으로 업데이트되었습니다.");
+        return new ResponseBody<>(HttpStatus.OK.value(), "게시글이 성공적으로 업데이트되었습니다.");
     }
 
     //게시글 삭제
     @Override
-    public ResponseEntity deleteBoard(Long boardId, String repositoryType) {
+    public ResponseBody<?> deleteBoard(Long boardId, String repositoryType) {
         Optional<Board> board = Optional.empty();
         if (repositoryType.equals("reforyou")) {
             board = reforyouRepository.findById(boardId);
         } else if (repositoryType.equals("reforme")) {
             board = reformeRepository.findById(boardId);
+        } else {
+            return new ResponseBody<>(HttpStatus.BAD_REQUEST.value(), "Invalid repository type");
+
         }
         if (!board.isPresent()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("게시글이 존재하지 않습니다");
+            return new ResponseBody<>(HttpStatus.NOT_FOUND.value(), "게시글이 존재하지 않습니다");
         }
 
-        // 파일 시스템에서 이미지 파일들을 삭제
-        board.get().getImages().forEach(image -> {
-            try {
-                Path fileToDelete = Paths.get(image.getImagePath());
-                Files.deleteIfExists(fileToDelete);
-                imageRepository.delete(image); //이게 이미지 레포에서 이미지를 삭제해주는거겠지?
-            } catch (IOException e) {
-                e.printStackTrace(); // 로그 남기기 또는 에러 처리
+        try {
+            // 파일 시스템에서 이미지 파일들을 삭제
+            board.get().getImages().forEach(image -> {
+                try {
+                    Path fileToDelete = Paths.get(image.getImagePath());
+                    Files.deleteIfExists(fileToDelete);
+                    imageRepository.delete(image); //이게 이미지 레포에서 이미지를 삭제해주는거겠지?
+                } catch (IOException e) {
+                    e.printStackTrace(); // 로그 남기기 또는 에러 처리
+                }
+            });
+
+            if (repositoryType.equals("reforyou")) {
+                reforyouRepository.delete(board.get());
+            } else if (repositoryType.equals("reforme")) {
+                reformeRepository.delete(board.get());
             }
-        });
-
-        if (repositoryType.equals("reforyou")) {
-            reforyouRepository.delete(board.get());
-        } else if (repositoryType.equals("reforme")) {
-            reformeRepository.delete(board.get());
+            return new ResponseBody<>(HttpStatus.OK.value(), "게시글이 성공적으로 삭제되었습니다");
+        } catch (Exception e) {
+            // 로깅 또는 다른 에러 처리
+            return new ResponseBody<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "파일 삭제 중 오류 발생");
         }
-        return ResponseEntity.ok().body("게시글이 성공적으로 삭제되었습니다.");
     }
+
 
 
     //이미지 업로드 기능(완)
