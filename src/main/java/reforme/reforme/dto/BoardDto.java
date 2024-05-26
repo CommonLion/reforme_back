@@ -23,7 +23,7 @@ public class BoardDto {
 
     private Image[] images;
 
-    private Comment[] comments;
+    private CommentDto[] comments;
 
     private String createdDateTime;
 
@@ -37,9 +37,12 @@ public class BoardDto {
         this.title = reforme.getTitle();
         this.body = reforme.getBody();
         this.images = reforme.getImages().toArray(new Image[0]);
-        this.comments = reforme.getComments().toArray(new Comment[0]);
+        this.comments = reforme.getComments().stream()
+                .map(CommentDto::new)
+                .toArray(CommentDto[]::new);
         this.createdDateTime = String.valueOf(reforme.getCreatedDateTime());
         this.modifiedDateTime = String.valueOf(reforme.getModifiedDateTime());
+        this.category = String.valueOf(reforme.getCategory());
     }
 
     public BoardDto(Reforyou reforyou){
@@ -48,9 +51,12 @@ public class BoardDto {
         this.title = reforyou.getTitle();
         this.body = reforyou.getBody();
         this.images = reforyou.getImages().toArray(new Image[0]);
-        this.comments = reforyou.getComments().toArray(new Comment[0]);
+        this.comments = reforyou.getComments().stream()
+                .map(CommentDto::new)
+                .toArray(CommentDto[]::new);
         this.createdDateTime = String.valueOf(reforyou.getCreatedDateTime());
         this.modifiedDateTime = String.valueOf(reforyou.getModifiedDateTime());
+        this.category = String.valueOf(reforyou.getCategory());
     }
 
 }

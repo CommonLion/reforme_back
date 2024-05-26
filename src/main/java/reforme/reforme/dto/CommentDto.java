@@ -4,8 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import reforme.reforme.entity.Comment;
 
-@Getter
-@Setter
+@Getter @Setter
 public class CommentDto {
 
     private String nickname;
@@ -13,6 +12,11 @@ public class CommentDto {
     private String content;
 
     private Boolean secret;
+
+    public CommentDto(String content, Boolean secret){
+        this.content = content;
+        this.secret = secret;
+    }
 
     public CommentDto(Comment comment){
         this.nickname = comment.getUser().getNickname();

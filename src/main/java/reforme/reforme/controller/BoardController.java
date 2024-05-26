@@ -3,11 +3,12 @@ package reforme.reforme.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import reforme.reforme.dto.ResponseBody;
 import reforme.reforme.entity.MeCategory;
 import reforme.reforme.entity.YouCategory;
 import reforme.reforme.entity.board.Reforme;
@@ -16,9 +17,8 @@ import reforme.reforme.repository.ReformeRepository;
 import reforme.reforme.repository.ReforyouRepository;
 import reforme.reforme.service.BoardService;
 
-@Controller
+@RestController
 @RequiredArgsConstructor
-//@ResponseBody
 public class BoardController {
 
     private final BoardService boardService;
@@ -27,117 +27,151 @@ public class BoardController {
 
     //리포미 메인화면
     @GetMapping("/reforme")
-    public String getBoards(@RequestParam(defaultValue = "0") int page, Model model) {
-        // 요청된 페이지와 사이즈에 해당하는 데이터를 가져와서 반환
-        Page<Reforme> boards = reformeRepository.findAllByOrderByCreatedDateTimeDesc(PageRequest.of(page, 10));
-        model.addAttribute("boardListItem", boardService.getReformeData(boards));
-        return "reforme";
+    public ResponseBody<?> getBoards(@RequestParam(defaultValue = "0") int page) {
+        try {
+            // 요청된 페이지와 사이즈에 해당하는 데이터를 가져와서 반환
+            Page<Reforme> boards = reformeRepository.findAllByOrderByCreatedDateTimeDesc(PageRequest.of(page, 10));
+            return new ResponseBody<>(HttpStatus.OK.value(), boardService.getReformeData(boards));
+        } catch (Exception e) {
+            return new ResponseBody<String>(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
     }
 
     //게시글 필터링(리포미)
     @GetMapping("/reforme/{category}")
-    public String getBoardsByCategory(
+    public ResponseBody<?> getBoardsByCategory(
             @PathVariable MeCategory category,
-            @RequestParam(defaultValue = "0") int page,
-            Model model
+            @RequestParam(defaultValue = "0") int page
     ) {
-        // 선택된 카테고리에 속하는 페이지 번호에 해당하는 데이터를 가져와 반환
-        Page<Reforme> boards = reformeRepository.findByCategory(category, PageRequest.of(page, 10));
-        model.addAttribute("searchListItem", boardService.getReformeData(boards));
-        return "reforme";
+        try {
+            // 선택된 카테고리에 속하는 페이지 번호에 해당하는 데이터를 가져와 반환
+            Page<Reforme> boards = reformeRepository.findByCategory(category, PageRequest.of(page, 10));
+            return new ResponseBody<>(HttpStatus.OK.value(), boardService.getReformeData(boards));
+        } catch (Exception e) {
+            return new ResponseBody<String>(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
     }
 
     //게시글 검색(리포미)
     @GetMapping("/reforme/search/{searchWord}")
-    public String getBoardsByMeSearch(
+    public ResponseBody<?> getBoardsByMeSearch(
             @PathVariable String searchWord,
-            @RequestParam(defaultValue = "0") int page,
-            Model model
+            @RequestParam(defaultValue = "0") int page
     ) {
-        // 선택된 카테고리에 속하는 페이지 번호에 해당하는 데이터를 가져와 반환
-        Page<Reforme> boards = reformeRepository.findByTitleContaining(searchWord, PageRequest.of(page, 10));
-        model.addAttribute("searchListItem", boardService.getReformeData(boards));
-        return "reforme";
+        try {
+            // 선택된 카테고리에 속하는 페이지 번호에 해당하는 데이터를 가져와 반환
+            Page<Reforme> boards = reformeRepository.findByTitleContaining(searchWord, PageRequest.of(page, 10));
+            return new ResponseBody<>(HttpStatus.OK.value(), boardService.getReformeData(boards));
+        } catch (Exception e) {
+            return new ResponseBody<String>(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
     }
 
     //게시글 필터링+검색(리포미)
     @GetMapping("/reforme/{category}/search/{searchWord}")
-    public String searchBoardsInCategory(
+    public ResponseBody<?> searchBoardsInCategory(
             @PathVariable MeCategory category,
             @PathVariable String searchWord,
-            @RequestParam(defaultValue = "0") int page,
-            Model model
+            @RequestParam(defaultValue = "0") int page
     ) {
-        // 선택된 카테고리에 속하는 게시글 중에서 제목에 검색어가 포함된 게시글을 가져오는 쿼리
-        Page<Reforme> boards = reformeRepository.findByCategoryAndTitleContaining(category, searchWord, PageRequest.of(page, 10));
-        model.addAttribute("searchListItem", boardService.getReformeData(boards));
-        return "reforme";
+
+        try {
+            // 선택된 카테고리에 속하는 게시글 중에서 제목에 검색어가 포함된 게시글을 가져오는 쿼리
+            Page<Reforme> boards = reformeRepository.findByCategoryAndTitleContaining(category, searchWord, PageRequest.of(page, 10));
+            return new ResponseBody<>(HttpStatus.OK.value(), boardService.getReformeData(boards));
+        } catch (Exception e) {
+            return new ResponseBody<String>(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+
     }
 
 
     //리포유 메인화면
     @GetMapping("/reforyou")
-    public String getReforyouBoards(@RequestParam(defaultValue = "0") int page, Model model) {
-        // 요청된 페이지와 사이즈에 해당하는 데이터를 가져와서 반환
-        Page<Reforyou> boards = reforyouRepository.findAllByOrderByCreatedDateTimeDesc(PageRequest.of(page, 10));
-        model.addAttribute("boardListItem", boardService.getReforyouData(boards));
-        return "reforyou";
+    public ResponseBody<?> getReforyouBoards(@RequestParam(defaultValue = "0") int page) {
+
+        try {
+            // 요청된 페이지와 사이즈에 해당하는 데이터를 가져와서 반환
+            Page<Reforyou> boards = reforyouRepository.findAllByOrderByCreatedDateTimeDesc(PageRequest.of(page, 10));
+            return new ResponseBody<>(HttpStatus.OK.value(), boardService.getReforyouData(boards));
+        } catch (Exception e) {
+            return new ResponseBody<String>(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+
     }
 
     //게시글 필터링(리포유)
     @GetMapping("/reforyou/{category}")
-    public String getBoardsByYouCategory(
+    public ResponseBody<?> getBoardsByYouCategory(
             @PathVariable YouCategory category,
-            @RequestParam(defaultValue = "0") int page,
-            Model model
+            @RequestParam(defaultValue = "0") int page
     ) {
-        // 선택된 카테고리에 속하는 페이지 번호에 해당하는 데이터를 가져와 반환
-        Page<Reforyou> boards = reforyouRepository.findByCategory(category, PageRequest.of(page, 10));
-        model.addAttribute("searchListItem", boardService.getReforyouData(boards));
-        return "reforyou";
+
+        try {
+            // 선택된 카테고리에 속하는 페이지 번호에 해당하는 데이터를 가져와 반환
+            Page<Reforyou> boards = reforyouRepository.findByCategory(category, PageRequest.of(page, 10));
+            return new ResponseBody<>(HttpStatus.OK.value(), boardService.getReforyouData(boards));
+        } catch (Exception e) {
+            return new ResponseBody<String>(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+
     }
 
     //게시글 검색(리포유)
     @GetMapping("/reforyou/search/{searchWord}")
-    public String getBoardsBYouSearch(
+    public ResponseBody<?> getBoardsBYouSearch(
             @PathVariable String searchWord,
-            @RequestParam(defaultValue = "0") int page,
-            Model model
+            @RequestParam(defaultValue = "0") int page
     ) {
-        // 선택된 카테고리에 속하는 페이지 번호에 해당하는 데이터를 가져와 반환
-        Page<Reforyou> boards = reforyouRepository.findByTitleContaining(searchWord, PageRequest.of(page, 10));
-        model.addAttribute("searchListItem", boardService.getReforyouData(boards));
-        return "reforyou";
+
+        try {
+            // 선택된 카테고리에 속하는 페이지 번호에 해당하는 데이터를 가져와 반환
+            Page<Reforyou> boards = reforyouRepository.findByTitleContaining(searchWord, PageRequest.of(page, 10));
+            return new ResponseBody<>(HttpStatus.OK.value(), boardService.getReforyouData(boards));
+        } catch (Exception e) {
+            return new ResponseBody<String>(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+
     }
 
     //게시글 필터링+검색(리포유)
     @GetMapping("/reforyou/{category}/search/{searchWord}")
-    public String searchReforyouBoardsInCategory(
+    public ResponseBody<?> searchReforyouBoardsInCategory(
             @PathVariable YouCategory category,
             @PathVariable String searchWord,
-            @RequestParam(defaultValue = "0") int page,
-            Model model
+            @RequestParam(defaultValue = "0") int page
     ) {
-        // 선택된 카테고리에 속하는 게시글 중에서 제목에 검색어가 포함된 게시글을 가져오는 쿼리
-        Page<Reforyou> boards = reforyouRepository.findByCategoryAndTitleContaining(category, searchWord, PageRequest.of(page, 10));
-        model.addAttribute("searchListItem", boardService.getReforyouData(boards));
-        return "reforyou";
+
+        try {
+            // 선택된 카테고리에 속하는 게시글 중에서 제목에 검색어가 포함된 게시글을 가져오는 쿼리
+            Page<Reforyou> boards = reforyouRepository.findByCategoryAndTitleContaining(category, searchWord, PageRequest.of(page, 10));
+            return new ResponseBody<>(HttpStatus.OK.value(), boardService.getReforyouData(boards));
+        } catch (Exception e) {
+            return new ResponseBody<String>(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
+
     }
 
     //상세글 조회(리포미)
     @GetMapping("/reforme/board/{boardId}")
-    public String reformeDetail(@PathVariable Long boardId, Model model){
-        model.addAttribute("boardItem", boardService.findByIdReformeBoard(boardId));
-        return "detail.html";
+    public ResponseBody<?> reformeDetail(@PathVariable Long boardId){
+
+        try {
+            return new ResponseBody<>(HttpStatus.OK.value(), boardService.findByIdReformeBoard(boardId));
+        } catch (Exception e) {
+            return new ResponseBody<String>(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
 
     }
 
     //상세글 조회(리포유)
     @GetMapping("/reforyou/board/{boardId}")
-    String reforyouDetail(@PathVariable Long boardId, Model model){
-        model.addAttribute("boardItem", boardService.findByIdReforyouBoard(boardId));
-        return "detail.html";
-
+    ResponseBody<?> reforyouDetail(@PathVariable Long boardId){
+        try {
+            return new ResponseBody<>(HttpStatus.OK.value(), boardService.findByIdReforyouBoard(boardId));
+        } catch (Exception e) {
+            return new ResponseBody<String>(HttpStatus.INTERNAL_SERVER_ERROR.value());
+        }
     }
 
 }

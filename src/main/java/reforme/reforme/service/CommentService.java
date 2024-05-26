@@ -1,18 +1,20 @@
 package reforme.reforme.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import reforme.reforme.dto.CommentDto;
+import reforme.reforme.dto.ResponseBody;
 import reforme.reforme.entity.Comment;
 import reforme.reforme.entity.User;
-import reforme.reforme.entity.board.Board;
 import reforme.reforme.entity.board.Reforme;
 import reforme.reforme.entity.board.Reforyou;
 import reforme.reforme.repository.CommentRepository;
 import reforme.reforme.repository.ReformeRepository;
 import reforme.reforme.repository.ReforyouRepository;
+import reforme.reforme.repository.UserRepository;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,68 +23,103 @@ import java.util.Optional;
 public class CommentService {
 
     private final CommentRepository commentRepository;
+    private final UserRepository userRepository;
+    private final ReformeRepository reformeRepository;
+    private final ReforyouRepository reforyouRepository;
 
-    public void saveReformeComment(String content, Boolean secret, String userid, Long boardId){
-        Comment comment = new Comment();
-        comment.setSecret(secret);
-        comment.setContent(content);
-        Reforme board = new Reforme();
-        board.setId(boardId);
-        User user = new User();
-        user.setId(userid);
-        comment.setUser(user);
-        var comments = board.getComments();
-        comments.add(comment);
-        board.setComments(comments);
-        commentRepository.save(comment);
+    public ResponseBody<String> saveReformeComment(String content, Boolean secret, Authentication auth, Long boardId){
+        try {
+            if(secret==null) secret = false;
+            String userid = auth.getName();
+            Comment comment = new Comment();
+            comment.setSecret(secret);
+            comment.setContent(content);
+            Optional<Reforme> board = reformeRepository.findById(boardId);
+            User user = userRepository.findOne(userid);
+            comment.setUser(user);
+            comment.setCreatedTime(LocalDateTime.now());
+            var comments = board.get().getComments();
+            comments.add(comment);
+            board.get().setComments(comments);
+            commentRepository.save(comment);
+            return new ResponseBody<>(HttpStatus.OK.value());
+        } catch (Exception e){
+            return new ResponseBody<>(HttpStatus.BAD_REQUEST.value());
+        }
     }
-    public void saveReforyouComment(String content, Boolean secret, String userid, Long boardId){
-        Comment comment = new Comment();
-        comment.setSecret(secret);
-        comment.setContent(content);
-        Reforyou board = new Reforyou();
-        board.setId(boardId);
-        User user = new User();
-        user.setId(userid);
-        comment.setUser(user);
-        var comments = board.getComments();
-        comments.add(comment);
-        board.setComments(comments);
-        commentRepository.save(comment);
+    public ResponseBody<String> saveReforyouComment(String content, Boolean secret, Authentication auth, Long boardId){
+        try {
+            if(secret==null) secret = false;
+            String userid = auth.getName();
+            Comment comment = new Comment();
+            comment.setSecret(secret);
+            comment.setContent(content);
+            Optional<Reforyou> board = reforyouRepository.findById(boardId);
+            User user = userRepository.findOne(userid);
+            comment.setUser(user);
+            comment.setCreatedTime(LocalDateTime.now());
+            var comments = board.get().getComments();
+            comments.add(comment);
+            board.get().setComments(comments);
+            commentRepository.save(comment);
+            return new ResponseBody<>(HttpStatus.OK.value());
+        } catch (Exception e){
+            return new ResponseBody<>(HttpStatus.BAD_REQUEST.value());
+        }
     }
 
-    public void deleteComment(Long id, String userid){
+    public ResponseBody<String> deleteReformeComment(Long id, Long boardId){
 
-        Optional<Comment> commentOptional = commentRepository.findById(id);
-        if (commentOptional.isPresent()) {
-            Comment comment = commentOptional.get();
-            if (comment.getUser().getId().equals(userid)) {
-                commentRepository.deleteById(id);
-            } else {
-                // userid가 댓글의 작성자와 일치하지 않을 때 예외 처리
-                throw new IllegalArgumentException("해당 댓글을 삭제할 수 있는 권한이 없습니다.");
+        try {
+            Reforme board = reformeRepository.findById(boardId).get();
+            List<Comment> comment = board.getComments();
+            for(int i=0; i<comment.size(); i++){
+                if(comment.get(i).getId().equals(id)) {
+                    comment.remove(i);
+                    break;
+                }
             }
-        } else {
-            // 주어진 ID에 해당하는 댓글이 없을 때 예외 처리
-            throw new IllegalArgumentException("주어진 ID에 해당하는 댓글을 찾을 수 없습니다.");
+            commentRepository.deleteById(id);
+
+            return new ResponseBody<>(HttpStatus.OK.value());
+        } catch (Exception e){
+            return new ResponseBody<>(HttpStatus.BAD_REQUEST.value());
         }
 
     }
 
-    public void editComment(Long id, String content, Boolean secret, String userid){
-        Optional<Comment> commentOptional = commentRepository.findById(id);
-        if (commentOptional.isPresent()) {
-            Comment comment = commentOptional.get();
-            if (comment.getUser().getId().equals(userid)) {
-                comment.setSecret(secret);
-                comment.setContent(content);
-            } else {
-                // userid가 댓글의 작성자와 일치하지 않을 때 예외 처리
-                throw new IllegalArgumentException("해당 댓글을 수정할 수 있는 권한이 없습니다.");
+    public ResponseBody<String> deleteReforyouComment(Long id, Long boardId){
+
+        try {
+            Reforyou board = reforyouRepository.findById(boardId).get();
+            List<Comment> comment = board.getComments();
+            for(int i=0; i<comment.size(); i++){
+                if(comment.get(i).getId().equals(id)) {
+                    comment.remove(i);
+                    break;
+                }
             }
-        } else {
-            // 주어진 ID에 해당하는 댓글이 없을 때 예외 처리
-            throw new IllegalArgumentException("주어진 ID에 해당하는 댓글을 찾을 수 없습니다.");
+
+            commentRepository.deleteById(id);
+
+            return new ResponseBody<>(HttpStatus.OK.value());
+        } catch (Exception e){
+            return new ResponseBody<>(HttpStatus.BAD_REQUEST.value());
+        }
+
+    }
+
+    public ResponseBody<String> editComment(Long id, String content, Boolean secret){
+        try {
+            Optional<Comment> commentOptional = commentRepository.findById(id);
+            Comment comment = commentOptional.get();
+            comment.setSecret(secret);
+            comment.setContent(content);
+            comment.setModifiedDateTime(LocalDateTime.now());
+            commentRepository.save(comment);
+            return new ResponseBody<>(HttpStatus.OK.value());
+        } catch (Exception e){
+            return new ResponseBody<>(HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 
