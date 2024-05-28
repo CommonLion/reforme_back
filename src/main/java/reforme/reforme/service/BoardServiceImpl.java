@@ -2,8 +2,6 @@ package reforme.reforme.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,7 +11,7 @@ import reforme.reforme.entity.YouCategory;
 import reforme.reforme.entity.Image;
 import reforme.reforme.entity.User;
 import reforme.reforme.entity.board.Board;
-import reforme.reforme.dto.BoardDto;
+import reforme.reforme.dto.BoardCreateDto;
 import reforme.reforme.dto.BoardUpdateDto;
 import reforme.reforme.entity.board.Reforme;
 import reforme.reforme.entity.board.Reforyou;
@@ -42,16 +40,16 @@ public class BoardServiceImpl implements BoardService {
     private final ImageRepository imageRepository;
 
     @Override
-    public ResponseBody<?> createBoard(BoardDto boardDto, MultipartFile[] images, String repositoryType) {
+    public ResponseBody<?> createBoard(BoardCreateDto boardCreateDto, MultipartFile[] images, String repositoryType) {
         //필요하면 매개변수에 Authentication auth를 추가해서 로그인 정보를 받아옴녀 좋을 것 같은데..
         //auth.getUserId 혹은 auth.getId해서 가져오면 될듯
         //단, 이렇게 할라면 프론트가 확보되어야 확인 할 수 있을듯. postman 요청으로 로그인 정보를 보낼 수 없음.
         //그리고 내가 따로 auth를 추가적으로 구현해야하는 부분이 있는지 알아봐야함
-        String userId = boardDto.getUserId();
+        String userId = boardCreateDto.getUserId();
         if (userId == null || userId.trim().isEmpty()) {
             return new ResponseBody<>(HttpStatus.BAD_REQUEST.value(), "UserId가 누락되었습니다");
         }
-        List<User> user = userRepository.findById(boardDto.getUserId());
+        List<User> user = userRepository.findById(boardCreateDto.getUserId());
         //이부분. 오류 날수 도 있음.
         if (user.isEmpty()) {
             return new ResponseBody<>(HttpStatus.NOT_FOUND.value(), "사용자를 찾을 수 없습니다");
@@ -64,10 +62,10 @@ public class BoardServiceImpl implements BoardService {
         //캐스팅하면 오류 많이 생긴다고해서 그냥 이렇게 따로 만듬. 뭔가 구리긴함.
         try {
             if (repositoryType.equals("reforyou")) {
-                Reforyou reforyouBoard = createReforyou(boardDto, userEntity, savedImages);
+                Reforyou reforyouBoard = createReforyou(boardCreateDto, userEntity, savedImages);
                 reforyouRepository.save(reforyouBoard);
             } else if (repositoryType.equals("reforme")) {
-                Reforme reformeBoard = createReforme(boardDto, userEntity, savedImages);
+                Reforme reformeBoard = createReforme(boardCreateDto, userEntity, savedImages);
                 reformeRepository.save(reformeBoard);
             } else {
                 return new ResponseBody<>(HttpStatus.BAD_REQUEST.value(), "Invalid repository type");
@@ -78,26 +76,26 @@ public class BoardServiceImpl implements BoardService {
         }
     }
 
-    private Reforyou createReforyou(BoardDto boardDto, User user, List<Image> images) {
+    private Reforyou createReforyou(BoardCreateDto boardCreateDto, User user, List<Image> images) {
         Reforyou reforyouBoard = new Reforyou();
-        reforyouBoard.setTitle(boardDto.getTitle());
-        reforyouBoard.setBody(boardDto.getBody());
+        reforyouBoard.setTitle(boardCreateDto.getTitle());
+        reforyouBoard.setBody(boardCreateDto.getBody());
         reforyouBoard.setCreatedDateTime(LocalDateTime.now());
         reforyouBoard.setModifiedDateTime(LocalDateTime.now());
         reforyouBoard.setUser(user);
-        reforyouBoard.setCategory(YouCategory.valueOf(boardDto.getCategory()));
+        reforyouBoard.setCategory(YouCategory.valueOf(boardCreateDto.getCategory()));
         reforyouBoard.setImages(images);
         return reforyouBoard;
     }
 
-    private Reforme createReforme(BoardDto boardDto, User user, List<Image> images) {
+    private Reforme createReforme(BoardCreateDto boardCreateDto, User user, List<Image> images) {
         Reforme reformeBoard = new Reforme();
-        reformeBoard.setTitle(boardDto.getTitle());
-        reformeBoard.setBody(boardDto.getBody());
+        reformeBoard.setTitle(boardCreateDto.getTitle());
+        reformeBoard.setBody(boardCreateDto.getBody());
         reformeBoard.setCreatedDateTime(LocalDateTime.now());
         reformeBoard.setModifiedDateTime(LocalDateTime.now());
         reformeBoard.setUser(user);
-        reformeBoard.setCategory(MeCategory.valueOf(boardDto.getCategory()));
+        reformeBoard.setCategory(MeCategory.valueOf(boardCreateDto.getCategory()));
         reformeBoard.setImages(images);
         return reformeBoard;
     }
@@ -191,9 +189,6 @@ public class BoardServiceImpl implements BoardService {
             return new ResponseBody<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "파일 삭제 중 오류 발생");
         }
     }
-
-
-
     //이미지 업로드 기능(완)
     private List<Image> saveImages(MultipartFile[] files) {
         List<Image> images = new ArrayList<>();

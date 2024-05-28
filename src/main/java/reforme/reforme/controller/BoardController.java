@@ -6,7 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 //import org.springframework.security.access.prepost.PreAuthorize;
-import reforme.reforme.dto.BoardDto;
+import reforme.reforme.dto.BoardCreateDto;
 import reforme.reforme.dto.BoardUpdateDto;
 import reforme.reforme.dto.ResponseBody;
 import reforme.reforme.service.BoardService;
@@ -27,9 +27,9 @@ public class BoardController {
 
     //이미지도 같이넘기려면 requestPart를 써야함 Body가 아니라
     @PostMapping("/reforyou/board")
-    public ResponseEntity<ResponseBody<?>> save(@RequestPart("board") BoardDto boardDto,
+    public ResponseEntity<ResponseBody<?>> save(@RequestPart("board") BoardCreateDto boardCreateDto,
                                @RequestPart("images") MultipartFile[] images) {
-        ResponseBody<?> responseBody = boardService.createBoard(boardDto, images, "reforyou");
+        ResponseBody<?> responseBody = boardService.createBoard(boardCreateDto, images, "reforyou");
         return ResponseEntity.status(responseBody.getStatusCode())
                 .body(responseBody);
     }
@@ -55,9 +55,9 @@ public class BoardController {
     //----------------------------reforme -----------------------//
 
     @PostMapping("/reforme/board")
-    public ResponseEntity<ResponseBody<?>> reformesave(@RequestPart("board") BoardDto boardDto,
+    public ResponseEntity<ResponseBody<?>> reformesave(@RequestPart("board") BoardCreateDto boardCreateDto,
                                       @RequestPart("images") MultipartFile[] images) {
-        ResponseBody<?> responseBody = boardService.createBoard(boardDto, images, "reforme");
+        ResponseBody<?> responseBody = boardService.createBoard(boardCreateDto, images, "reforme");
         return ResponseEntity.status(responseBody.getStatusCode())
                 .body(responseBody);
     }
