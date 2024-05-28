@@ -31,7 +31,7 @@ public abstract class Board {
     @OneToMany
     private List<Image> images = new ArrayList<>();
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.REMOVE)
     private List<Comment> comments = new ArrayList<>();
 
     private LocalDateTime createdDateTime;
