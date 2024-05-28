@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import reforme.reforme.dto.CommentDto;
-import reforme.reforme.dto.ResponseBody;
 import reforme.reforme.service.CommentService;
+import reforme.reforme.dto.ResponseBody;
 
 @RestController
 @RequiredArgsConstructor
@@ -15,7 +15,7 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/reforme/board/{boardId}/comment")
-    ResponseBody<String> addComment(@RequestBody CommentDto commentDto,
+    ResponseBody<?> addComment(@RequestBody CommentDto commentDto,
                                     Authentication auth,
                                     @PathVariable Long boardId){
 
@@ -23,14 +23,14 @@ public class CommentController {
     }
 
     @PatchMapping("/reforme/board/{boardId}/comment")
-    ResponseBody<String> editComment(@RequestParam Long id,
+    ResponseBody<?> editComment(@RequestParam Long id,
                                      @RequestBody CommentDto commentDto){
 
         return commentService.editComment(id, commentDto.getContent(), commentDto.getSecret());
     }
 
     @DeleteMapping("/reforme/board/{boardId}/comment")
-    ResponseBody<String> deleteComment(@RequestParam Long id,
+    ResponseBody<?> deleteComment(@RequestParam Long id,
                                        @PathVariable Long boardId){
 
         return commentService.deleteReformeComment(id, boardId);
@@ -38,7 +38,7 @@ public class CommentController {
     }
 
     @PostMapping("/reforyou/board/{boardId}/comment")
-    ResponseBody<String> addReforyouComment(@RequestBody CommentDto commentDto,
+    ResponseBody<?> addReforyouComment(@RequestBody CommentDto commentDto,
                                             Authentication auth,
                                             @PathVariable Long boardId){
 
@@ -46,7 +46,7 @@ public class CommentController {
     }
 
     @PatchMapping("/reforyou/board/{boardId}/comment")
-    ResponseBody<String> editReforyouComment(@RequestParam Long id,
+    ResponseBody<?> editReforyouComment(@RequestParam Long id,
                                              @RequestBody CommentDto commentDto){
 
         return commentService.editComment(id, commentDto.getContent(), commentDto.getSecret());
@@ -54,7 +54,7 @@ public class CommentController {
     }
 
     @DeleteMapping("/reforyou/board/{boardId}/comment")
-    ResponseBody<String> deleteReforyouComment(@RequestParam Long id,
+    ResponseBody<?> deleteReforyouComment(@RequestParam Long id,
                                                @PathVariable Long boardId){
 
         return commentService.deleteReforyouComment(id, boardId);
