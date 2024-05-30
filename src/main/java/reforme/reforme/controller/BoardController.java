@@ -4,10 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import reforme.reforme.dto.BoardCreateDto;
+import reforme.reforme.dto.BoardUpdateDto;
 import reforme.reforme.dto.ResponseBody;
 import reforme.reforme.entity.MeCategory;
 import reforme.reforme.entity.YouCategory;
@@ -24,6 +25,72 @@ public class BoardController {
     private final BoardService boardService;
     private final ReformeRepository reformeRepository;
     private final ReforyouRepository reforyouRepository;
+
+
+    //------------------------------------------게시글 작성, 수정, 삭제----------------------------------------//
+
+    //이거는 작성 페이지 열기
+    //그게 없음, 게시글 작성 페이지로 넘어가는 거에 대한 Mapping은 API명세서에도 언급이 없다는 듯.
+    //그 챗봇 위에 +버튼 누르면 Mappinge되게 해야 함. 챗봇도 아직 주소가 안정해 져있긴함.
+    @GetMapping("/board")
+    public String showCreatePostPage() {
+        return "postForm";
+    }
+
+    //이미지도 같이넘기려면 requestPart를 써야함 Body가 아니라
+    @PostMapping("/reforyou/board")
+    public ResponseEntity<ResponseBody<?>> save(@RequestPart("board") BoardCreateDto boardCreateDto,
+                                                @RequestPart("images") MultipartFile[] images) {
+        ResponseBody<?> responseBody = boardService.createReforyouBoard(boardCreateDto, images);
+        return ResponseEntity.status(responseBody.getStatusCode())
+                .body(responseBody);
+    }
+
+    //게시판 수정
+    @PatchMapping("/reforyou/board/{id}")
+    public ResponseEntity<ResponseBody<?>> update(@PathVariable Long id,
+                                                  @RequestPart("board") BoardUpdateDto updateDto,
+                                                  @RequestPart("images") MultipartFile[] images){
+        ResponseBody<?> responseBody  = boardService.updateReforyouBoard(id, updateDto, images);
+        return ResponseEntity.status(responseBody.getStatusCode())
+                .body(responseBody);
+    }
+
+    //게시판 삭제
+    @DeleteMapping("/reforyou/board/{boardId}")
+    public ResponseEntity<ResponseBody<?>> remove(@PathVariable Long boardId) {
+        ResponseBody<?> responseBody = boardService.deleteReforyouBoard(boardId);
+        return ResponseEntity.status(responseBody.getStatusCode())
+                .body(responseBody);
+    }
+
+    //----------------------------reforme -----------------------//
+
+    @PostMapping("/reforme/board")
+    public ResponseEntity<ResponseBody<?>> reformesave(@RequestPart("board") BoardCreateDto boardCreateDto,
+                                                       @RequestPart("images") MultipartFile[] images) {
+        ResponseBody<?> responseBody = boardService.createReformeBoard(boardCreateDto, images);
+        return ResponseEntity.status(responseBody.getStatusCode())
+                .body(responseBody);
+    }
+
+    @PatchMapping("/reforme/board/{id}")
+    public ResponseEntity<ResponseBody<?>> reformeupdate(@PathVariable Long id,
+                                                         @RequestPart("board") BoardUpdateDto updateDto,
+                                                         @RequestPart("images") MultipartFile[] images){
+        ResponseBody<?> responseBody = boardService.updateReformeBoard(id, updateDto, images);
+        return ResponseEntity.status(responseBody.getStatusCode())
+                .body(responseBody);
+    }
+
+    @DeleteMapping("/reforme/board/{boardId}")
+    public ResponseEntity<ResponseBody<?>> reformeremove(@PathVariable Long boardId) {
+        ResponseBody<?> responseBody = boardService.deleteReformeBoard(boardId);
+        return ResponseEntity.status(responseBody.getStatusCode())
+                .body(responseBody);
+    }
+
+    //------------------------------나머지 board 기능----------------------------------//
 
     //리포미 메인화면
     @GetMapping("/reforme")

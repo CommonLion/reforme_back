@@ -4,11 +4,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Getter @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Image {
 
     @Id @GeneratedValue
@@ -18,4 +20,5 @@ public class Image {
     private String origImageName;
 
     private String imagePath;
+
 }
