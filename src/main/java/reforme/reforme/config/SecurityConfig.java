@@ -16,6 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -72,7 +73,20 @@ public class SecurityConfig {
                 .permitAll()
         );
         http.logout(logout -> logout
-                .logoutUrl("/signout"));
+                .logoutUrl("/signout")
+                .logoutSuccessHandler(new LogoutSuccessHandler() {
+                    @Override
+                    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.setContentType("application/json;charset=UTF-8");
+                        PrintWriter writer = response.getWriter();
+                        Map<String, Object> responseBody = new HashMap<>();
+                        responseBody.put("statusCode", HttpServletResponse.SC_OK);
+                        writer.write(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(responseBody));
+                        writer.flush();
+                    }
+                })
+        );
         return http.build();
     }
 
