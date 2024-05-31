@@ -42,11 +42,9 @@ public class UserService implements UserDetailsService {
     /**
      * id 중복 검사
      */
-    public void validateDuplicateUser(User user) {
-        List<User> findUsers = userRepository.findById(user.getId());
-        if (!findUsers.isEmpty()) {
-            throw new IllegalStateException("이미 존재하는 id입니다.");
-        }
+    public boolean validateDuplicateUser(String userId) {
+        List<User> findUsers = userRepository.findById(userId);
+        return findUsers.isEmpty();
     }
 
     /**

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import reforme.reforme.dto.ResponseBody;
+import reforme.reforme.dto.UserCheckDto;
 import reforme.reforme.dto.UserDto;
 import reforme.reforme.service.UserService;
 
@@ -25,10 +26,13 @@ public class UserController {
         return new ResponseBody<>(HttpStatus.OK.value());
     }
 
-//    @GetMapping("/signup/check")
-//    public String signupCkeck() {
-//
-//    }
+    @PostMapping("/signup/check")
+    public ResponseBody<?> signupCkeck(@RequestBody UserCheckDto userCheckDto) {
+        if (userService.validateDuplicateUser(userCheckDto.getUserId())) {
+            return new ResponseBody<String>(HttpStatus.OK.value());
+        }
+        return new ResponseBody<String>(HttpStatus.BAD_REQUEST.value());
+    }
 
     @PostMapping("/signup")
     public ResponseBody<?> signup(@Valid @RequestBody UserDto userDto, BindingResult result) {
