@@ -261,7 +261,7 @@ public class BoardService {
     //이미지 업로드 기능(완)
     private List<Image> saveImages(MultipartFile[] files) {
         List<Image> images = new ArrayList<>();
-        String directoryPath = "/Users/player7571/Desktop/images";  // 이미지를 저장할 디렉토리 경로
+        String directoryPath = "/Users/player7571/Desktop/reforme/src/main/resources/static/images";  // 이미지를 저장할 디렉토리 경로
 
         for (MultipartFile file : files) {
             if (!file.isEmpty()) {
@@ -274,7 +274,7 @@ public class BoardService {
 
                     // 이미지 엔티티 생성 및 정보 설정
                     Image image = Image.builder()
-                            .imagePath(filePath.toString())
+                            .imagePath("/images/"+uniqueFileName)
                             .origImageName(file.getOriginalFilename())
                             .build();
 
