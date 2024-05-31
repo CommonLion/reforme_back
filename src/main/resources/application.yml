@@ -1,10 +1,13 @@
 # JPA
+
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${SPRING_DATASOURCE_URL}
     username: root
     password: ${SPRING_DATASOURCE_PASSWORD}
+
+
   jpa:
     database: mysql
     database-platform: org.hibernate.dialect.MySQLDialect
@@ -18,3 +21,8 @@ spring:
 logging.level:
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
+    org.springframework.security: DEBUG
+
+jwt:
+    secret: mySecretKey  # 여기에 비밀 키를 입력하세요.
+    expiration: 604800   # 토큰 만료 시간 (초 단위, 예: 7일)

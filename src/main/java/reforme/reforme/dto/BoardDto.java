@@ -2,12 +2,10 @@ package reforme.reforme.dto;
 
 import lombok.Getter;
 import lombok.Setter;
-import reforme.reforme.entity.Comment;
 import reforme.reforme.entity.Image;
 import reforme.reforme.entity.board.Reforme;
 import reforme.reforme.entity.board.Reforyou;
-
-import java.util.List;
+;
 
 @Getter
 @Setter
@@ -21,7 +19,7 @@ public class BoardDto {
 
     private String body;
 
-    private Image[] images;
+    private ImageDto[] images;
 
     private CommentDto[] comments;
 
@@ -36,7 +34,9 @@ public class BoardDto {
         this.userId = reforme.getUser().getId();
         this.title = reforme.getTitle();
         this.body = reforme.getBody();
-        this.images = reforme.getImages().toArray(new Image[0]);
+        this.images = reforme.getImages().stream()
+                .map(ImageDto::new)
+                .toArray(ImageDto[]::new);
         this.comments = reforme.getComments().stream()
                 .map(CommentDto::new)
                 .toArray(CommentDto[]::new);
@@ -50,7 +50,9 @@ public class BoardDto {
         this.userId = reforyou.getUser().getId();
         this.title = reforyou.getTitle();
         this.body = reforyou.getBody();
-        this.images = reforyou.getImages().toArray(new Image[0]);
+        this.images = reforyou.getImages().stream()
+                .map(ImageDto::new)
+                .toArray(ImageDto[]::new);
         this.comments = reforyou.getComments().stream()
                 .map(CommentDto::new)
                 .toArray(CommentDto[]::new);

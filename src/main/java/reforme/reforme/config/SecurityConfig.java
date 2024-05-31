@@ -1,4 +1,4 @@
-package reforme.reforme;
+package reforme.reforme.config;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,8 +16,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
@@ -36,16 +40,19 @@ public class SecurityConfig {
         );
         http.formLogin(formLogin -> formLogin
                 .loginPage("/signin")
-                .defaultSuccessUrl("/")
-                .failureUrl("/signin")
-                .usernameParameter("id")
                 .loginProcessingUrl("/signin")
+                .usernameParameter("userId")
                 .successHandler(
                         new AuthenticationSuccessHandler() {
                             @Override
                             public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-                                System.out.println("authentication : " + authentication.getName());
-                                response.sendRedirect("/"); // 인증이 성공한 후에는 root로 이동
+                                response.setStatus(HttpServletResponse.SC_OK);
+                                response.setContentType("application/json;charset=UTF-8");
+                                PrintWriter writer = response.getWriter();
+                                Map<String, Object> responseBody = new HashMap<>();
+                                responseBody.put("statusCode", HttpServletResponse.SC_OK);
+                                writer.write(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(responseBody));
+                                writer.flush();
                             }
                         }
                 )
@@ -53,15 +60,33 @@ public class SecurityConfig {
                         new AuthenticationFailureHandler() {
                             @Override
                             public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
-                                System.out.println("exception : " + exception.getMessage());
-                                response.sendRedirect("/signin");
+                                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                                response.setContentType("application/json;charset=UTF-8");
+                                PrintWriter writer = response.getWriter();
+                                Map<String, Object> responseBody = new HashMap<>();
+                                responseBody.put("statusCode", HttpServletResponse.SC_UNAUTHORIZED);
+                                writer.write(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(responseBody));
+                                writer.flush();
                             }
                         }
                 )
                 .permitAll()
         );
         http.logout(logout -> logout
-                .logoutUrl("/signout"));
+                .logoutUrl("/signout")
+                .logoutSuccessHandler(new LogoutSuccessHandler() {
+                    @Override
+                    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response.setContentType("application/json;charset=UTF-8");
+                        PrintWriter writer = response.getWriter();
+                        Map<String, Object> responseBody = new HashMap<>();
+                        responseBody.put("statusCode", HttpServletResponse.SC_OK);
+                        writer.write(new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(responseBody));
+                        writer.flush();
+                    }
+                })
+        );
         return http.build();
     }
 
@@ -69,5 +94,4 @@ public class SecurityConfig {
     AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
-
 }
