@@ -51,16 +51,17 @@ public class BoardController {
     @PatchMapping("/reforyou/board/{id}")
     public ResponseEntity<ResponseBody<?>> update(@PathVariable Long id,
                                                   @RequestPart("board") BoardEditDto boardEditDto,
-                                                  @RequestPart("images") MultipartFile[] images){
-        ResponseBody<?> responseBody  = boardService.updateReforyouBoard(id, boardEditDto, images);
+                                                  @RequestPart("images") MultipartFile[] images,
+                                                  Authentication auth){
+        ResponseBody<?> responseBody  = boardService.updateReforyouBoard(id, boardEditDto, images, auth);
         return ResponseEntity.status(responseBody.getStatusCode())
                 .body(responseBody);
     }
 
     //게시판 삭제
     @DeleteMapping("/reforyou/board/{boardId}")
-    public ResponseEntity<ResponseBody<?>> remove(@PathVariable Long boardId) {
-        ResponseBody<?> responseBody = boardService.deleteReforyouBoard(boardId);
+    public ResponseEntity<ResponseBody<?>> remove(@PathVariable Long boardId, Authentication auth) {
+        ResponseBody<?> responseBody = boardService.deleteReforyouBoard(boardId, auth);
         return ResponseEntity.status(responseBody.getStatusCode())
                 .body(responseBody);
     }
@@ -79,15 +80,16 @@ public class BoardController {
     @PatchMapping("/reforme/board/{id}")
     public ResponseEntity<ResponseBody<?>> reformeupdate(@PathVariable Long id,
                                                          @RequestPart("board") BoardEditDto boardEditDto,
-                                                         @RequestPart("images") MultipartFile[] images){
-        ResponseBody<?> responseBody = boardService.updateReformeBoard(id, boardEditDto, images);
+                                                         @RequestPart("images") MultipartFile[] images,
+                                                         Authentication auth){
+        ResponseBody<?> responseBody = boardService.updateReformeBoard(id, boardEditDto, images, auth);
         return ResponseEntity.status(responseBody.getStatusCode())
                 .body(responseBody);
     }
 
     @DeleteMapping("/reforme/board/{boardId}")
-    public ResponseEntity<ResponseBody<?>> reformeremove(@PathVariable Long boardId) {
-        ResponseBody<?> responseBody = boardService.deleteReformeBoard(boardId);
+    public ResponseEntity<ResponseBody<?>> reformeremove(@PathVariable Long boardId, Authentication auth) {
+        ResponseBody<?> responseBody = boardService.deleteReformeBoard(boardId, auth);
         return ResponseEntity.status(responseBody.getStatusCode())
                 .body(responseBody);
     }
@@ -95,7 +97,7 @@ public class BoardController {
     //------------------------------나머지 board 기능----------------------------------//
 
     //리포미 메인화면
-    @GetMapping("/reforme")
+    @GetMapping("/reforme/ALL")
     public ResponseBody<?> getBoards(@RequestParam(defaultValue = "0") int page) {
         try {
             // 요청된 페이지와 사이즈에 해당하는 데이터를 가져와서 반환
@@ -156,7 +158,7 @@ public class BoardController {
 
 
     //리포유 메인화면
-    @GetMapping("/reforyou")
+    @GetMapping("/reforyou/ALL")
     public ResponseBody<?> getReforyouBoards(@RequestParam(defaultValue = "0") int page) {
 
         try {

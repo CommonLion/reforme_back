@@ -119,7 +119,7 @@ public class BoardService {
     }
 
     //게시판 업데이트
-    public ResponseBody<?> updateReformeBoard(Long boardId, BoardEditDto boardEditDto, MultipartFile[] images) {
+    public ResponseBody<?> updateReformeBoard(Long boardId, BoardEditDto boardEditDto, MultipartFile[] images, Authentication auth) {
         // 게시글 정보 업데이트
         Reforme existingBoard = null;
         try {
@@ -128,13 +128,16 @@ public class BoardService {
             return new ResponseBody<>(HttpStatus.NOT_FOUND.value(), e.getMessage());
         }
 
+        Reforme board = reformeRepository.findById(boardId).get();
+        if(!auth.getName().equals(board.getUser().getId())) {
+            return new ResponseBody<>(HttpStatus.BAD_REQUEST.value(), "권한이 없습니다.");
+        }
         existingBoard.setTitle(boardEditDto.getTitle());
         existingBoard.setBody(boardEditDto.getBody());
         existingBoard.setModifiedDateTime(LocalDateTime.now());
 
         // 기존 이미지 삭제 로직
         if (existingBoard.getImages() != null) {
-            Reforme board = reformeRepository.findById(boardId).get();
             List<Image> reformeImages = board.getImages();
             reformeImages.clear();
             existingBoard.getImages().forEach(image -> {
@@ -159,7 +162,7 @@ public class BoardService {
 
         return new ResponseBody<>(HttpStatus.OK.value(), "게시글이 성공적으로 업데이트되었습니다.");
     }
-    public ResponseBody<?> updateReforyouBoard(Long boardId, BoardEditDto boardEditDto, MultipartFile[] images) {
+    public ResponseBody<?> updateReforyouBoard(Long boardId, BoardEditDto boardEditDto, MultipartFile[] images, Authentication auth) {
         // 게시글 정보 업데이트
         Reforyou existingBoard = null;
         try {
@@ -168,13 +171,16 @@ public class BoardService {
             return new ResponseBody<>(HttpStatus.NOT_FOUND.value(), e.getMessage());
         }
 
+        Reforyou board = reforyouRepository.findById(boardId).get();
+        if(!auth.getName().equals(board.getUser().getId())) {
+            return new ResponseBody<>(HttpStatus.BAD_REQUEST.value(), "권한이 없습니다.");
+        }
         existingBoard.setTitle(boardEditDto.getTitle());
         existingBoard.setBody(boardEditDto.getBody());
         existingBoard.setModifiedDateTime(LocalDateTime.now());
 
         // 기존 이미지 삭제 로직
         if (existingBoard.getImages() != null) {
-            Reforyou board = reforyouRepository.findById(boardId).get();
             List<Image> reforyouImages = board.getImages();
             reforyouImages.clear();
             existingBoard.getImages().forEach(image -> {
@@ -201,19 +207,23 @@ public class BoardService {
     }
 
     //게시글 삭제
-    public ResponseBody<?> deleteReformeBoard(Long boardId) {
+    public ResponseBody<?> deleteReformeBoard(Long boardId, Authentication auth) {
         Optional<Reforme> board = reformeRepository.findById(boardId);
 
         if (!board.isPresent()) {
             return new ResponseBody<>(HttpStatus.NOT_FOUND.value(), "게시글이 존재하지 않습니다");
         }
 
+        if(!auth.getName().equals(board.get().getUser().getId())) {
+            return new ResponseBody<>(HttpStatus.BAD_REQUEST.value(), "권한이 없습니다.");
+        }
+
         try {
             // 파일 시스템에서 이미지 파일들을 삭제
+            Reforme meBoard = reformeRepository.findById(boardId).get();
+            List<Image> reformeImages = meBoard.getImages();
+            reformeImages.clear();
             board.get().getImages().forEach(image -> {
-                Reforme meBoard = reformeRepository.findById(boardId).get();
-                List<Image> reformeImages = meBoard.getImages();
-                reformeImages.clear();
                 try {
                     Path fileToDelete = Paths.get(image.getImagePath());
                     Files.deleteIfExists(fileToDelete);
@@ -230,18 +240,20 @@ public class BoardService {
             return new ResponseBody<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "파일 삭제 중 오류 발생");
         }
     }
-    public ResponseBody<?> deleteReforyouBoard(Long boardId) {
+    public ResponseBody<?> deleteReforyouBoard(Long boardId, Authentication auth) {
         Optional<Reforyou> board = reforyouRepository.findById(boardId);
         if (!board.isPresent()) {
             return new ResponseBody<>(HttpStatus.NOT_FOUND.value(), "게시글이 존재하지 않습니다");
         }
-
+        if(!auth.getName().equals(board.get().getUser().getId())) {
+            return new ResponseBody<>(HttpStatus.BAD_REQUEST.value(), "권한이 없습니다.");
+        }
         try {
             // 파일 시스템에서 이미지 파일들을 삭제
+            Reforyou youBoard = reforyouRepository.findById(boardId).get();
+            List<Image> reforyouImages = youBoard.getImages();
+            reforyouImages.clear();
             board.get().getImages().forEach(image -> {
-                Reforyou youBoard = reforyouRepository.findById(boardId).get();
-                List<Image> reforyouImages = youBoard.getImages();
-                reforyouImages.clear();
                 try {
                     Path fileToDelete = Paths.get(image.getImagePath());
                     Files.deleteIfExists(fileToDelete);
