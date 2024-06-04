@@ -24,16 +24,18 @@ public class CommentController {
 
     @PatchMapping("/reforme/board/{boardId}/comment")
     ResponseBody<?> editComment(@RequestParam Long id,
-                                     @RequestBody CommentDto commentDto){
+                                @RequestBody CommentDto commentDto,
+                                Authentication auth){
 
-        return commentService.editComment(id, commentDto.getContent(), commentDto.getSecret());
+        return commentService.editComment(id, commentDto.getContent(), commentDto.getSecret(), auth);
     }
 
     @DeleteMapping("/reforme/board/{boardId}/comment")
     ResponseBody<?> deleteComment(@RequestParam Long id,
-                                       @PathVariable Long boardId){
+                                  @PathVariable Long boardId,
+                                  Authentication auth){
 
-        return commentService.deleteReformeComment(id, boardId);
+        return commentService.deleteReformeComment(id, boardId, auth);
 
     }
 
@@ -47,17 +49,19 @@ public class CommentController {
 
     @PatchMapping("/reforyou/board/{boardId}/comment")
     ResponseBody<?> editReforyouComment(@RequestParam Long id,
-                                             @RequestBody CommentDto commentDto){
+                                        @RequestBody CommentDto commentDto,
+                                        Authentication auth){
 
-        return commentService.editComment(id, commentDto.getContent(), commentDto.getSecret());
+        return commentService.editComment(id, commentDto.getContent(), commentDto.getSecret(), auth);
 
     }
 
     @DeleteMapping("/reforyou/board/{boardId}/comment")
     ResponseBody<?> deleteReforyouComment(@RequestParam Long id,
-                                               @PathVariable Long boardId){
+                                          @PathVariable Long boardId,
+                                          Authentication auth){
 
-        return commentService.deleteReforyouComment(id, boardId);
+        return commentService.deleteReforyouComment(id, boardId, auth);
 
     }
 

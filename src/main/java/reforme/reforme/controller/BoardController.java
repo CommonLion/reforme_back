@@ -5,10 +5,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import reforme.reforme.dto.BoardCreateDto;
-import reforme.reforme.dto.BoardUpdateDto;
+import reforme.reforme.dto.BoardEditDto;
 import reforme.reforme.dto.ResponseBody;
 import reforme.reforme.entity.MeCategory;
 import reforme.reforme.entity.YouCategory;
@@ -39,9 +39,10 @@ public class BoardController {
 
     //이미지도 같이넘기려면 requestPart를 써야함 Body가 아니라
     @PostMapping("/reforyou/board")
-    public ResponseEntity<ResponseBody<?>> save(@RequestPart("board") BoardCreateDto boardCreateDto,
-                                                @RequestPart("images") MultipartFile[] images) {
-        ResponseBody<?> responseBody = boardService.createReforyouBoard(boardCreateDto, images);
+    public ResponseEntity<ResponseBody<?>> save(@RequestPart("board") BoardEditDto boardEditDto,
+                                                @RequestPart("images") MultipartFile[] images,
+                                                Authentication auth) {
+        ResponseBody<?> responseBody = boardService.createReforyouBoard(boardEditDto, images, auth);
         return ResponseEntity.status(responseBody.getStatusCode())
                 .body(responseBody);
     }
@@ -49,17 +50,18 @@ public class BoardController {
     //게시판 수정
     @PatchMapping("/reforyou/board/{id}")
     public ResponseEntity<ResponseBody<?>> update(@PathVariable Long id,
-                                                  @RequestPart("board") BoardUpdateDto updateDto,
-                                                  @RequestPart("images") MultipartFile[] images){
-        ResponseBody<?> responseBody  = boardService.updateReforyouBoard(id, updateDto, images);
+                                                  @RequestPart("board") BoardEditDto boardEditDto,
+                                                  @RequestPart("images") MultipartFile[] images,
+                                                  Authentication auth){
+        ResponseBody<?> responseBody  = boardService.updateReforyouBoard(id, boardEditDto, images, auth);
         return ResponseEntity.status(responseBody.getStatusCode())
                 .body(responseBody);
     }
 
     //게시판 삭제
     @DeleteMapping("/reforyou/board/{boardId}")
-    public ResponseEntity<ResponseBody<?>> remove(@PathVariable Long boardId) {
-        ResponseBody<?> responseBody = boardService.deleteReforyouBoard(boardId);
+    public ResponseEntity<ResponseBody<?>> remove(@PathVariable Long boardId, Authentication auth) {
+        ResponseBody<?> responseBody = boardService.deleteReforyouBoard(boardId, auth);
         return ResponseEntity.status(responseBody.getStatusCode())
                 .body(responseBody);
     }
@@ -67,25 +69,27 @@ public class BoardController {
     //----------------------------reforme -----------------------//
 
     @PostMapping("/reforme/board")
-    public ResponseEntity<ResponseBody<?>> reformesave(@RequestPart("board") BoardCreateDto boardCreateDto,
-                                                       @RequestPart("images") MultipartFile[] images) {
-        ResponseBody<?> responseBody = boardService.createReformeBoard(boardCreateDto, images);
+    public ResponseEntity<ResponseBody<?>> reformesave(@RequestPart("board") BoardEditDto boardEditDto,
+                                                       @RequestPart("images") MultipartFile[] images,
+                                                       Authentication auth) {
+        ResponseBody<?> responseBody = boardService.createReformeBoard(boardEditDto, images, auth);
         return ResponseEntity.status(responseBody.getStatusCode())
                 .body(responseBody);
     }
 
     @PatchMapping("/reforme/board/{id}")
     public ResponseEntity<ResponseBody<?>> reformeupdate(@PathVariable Long id,
-                                                         @RequestPart("board") BoardUpdateDto updateDto,
-                                                         @RequestPart("images") MultipartFile[] images){
-        ResponseBody<?> responseBody = boardService.updateReformeBoard(id, updateDto, images);
+                                                         @RequestPart("board") BoardEditDto boardEditDto,
+                                                         @RequestPart("images") MultipartFile[] images,
+                                                         Authentication auth){
+        ResponseBody<?> responseBody = boardService.updateReformeBoard(id, boardEditDto, images, auth);
         return ResponseEntity.status(responseBody.getStatusCode())
                 .body(responseBody);
     }
 
     @DeleteMapping("/reforme/board/{boardId}")
-    public ResponseEntity<ResponseBody<?>> reformeremove(@PathVariable Long boardId) {
-        ResponseBody<?> responseBody = boardService.deleteReformeBoard(boardId);
+    public ResponseEntity<ResponseBody<?>> reformeremove(@PathVariable Long boardId, Authentication auth) {
+        ResponseBody<?> responseBody = boardService.deleteReformeBoard(boardId, auth);
         return ResponseEntity.status(responseBody.getStatusCode())
                 .body(responseBody);
     }
@@ -93,7 +97,7 @@ public class BoardController {
     //------------------------------나머지 board 기능----------------------------------//
 
     //리포미 메인화면
-    @GetMapping("/reforme")
+    @GetMapping("/reforme/ALL")
     public ResponseBody<?> getBoards(@RequestParam(defaultValue = "0") int page) {
         try {
             // 요청된 페이지와 사이즈에 해당하는 데이터를 가져와서 반환
@@ -154,7 +158,7 @@ public class BoardController {
 
 
     //리포유 메인화면
-    @GetMapping("/reforyou")
+    @GetMapping("/reforyou/ALL")
     public ResponseBody<?> getReforyouBoards(@RequestParam(defaultValue = "0") int page) {
 
         try {

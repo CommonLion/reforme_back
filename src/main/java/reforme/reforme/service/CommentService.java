@@ -68,13 +68,14 @@ public class CommentService {
         }
     }
 
-    public ResponseBody<String> deleteReformeComment(Long id, Long boardId){
+    public ResponseBody<String> deleteReformeComment(Long id, Long boardId, Authentication auth){
 
         try {
             Reforme board = reformeRepository.findById(boardId).get();
             List<Comment> comment = board.getComments();
             for(int i=0; i<comment.size(); i++){
                 if(comment.get(i).getId().equals(id)) {
+                    if(!auth.getName().equals(comment.get(i).getUser().getId())) return new ResponseBody<>(HttpStatus.BAD_REQUEST.value(), "권한이 없습니다.");
                     comment.remove(i);
                     break;
                 }
@@ -88,13 +89,14 @@ public class CommentService {
 
     }
 
-    public ResponseBody<String> deleteReforyouComment(Long id, Long boardId){
+    public ResponseBody<String> deleteReforyouComment(Long id, Long boardId, Authentication auth){
 
         try {
             Reforyou board = reforyouRepository.findById(boardId).get();
             List<Comment> comment = board.getComments();
             for(int i=0; i<comment.size(); i++){
                 if(comment.get(i).getId().equals(id)) {
+                    if(!auth.getName().equals(comment.get(i).getUser().getId())) return new ResponseBody<>(HttpStatus.BAD_REQUEST.value(), "권한이 없습니다.");
                     comment.remove(i);
                     break;
                 }
@@ -109,10 +111,11 @@ public class CommentService {
 
     }
 
-    public ResponseBody<String> editComment(Long id, String content, Boolean secret){
+    public ResponseBody<String> editComment(Long id, String content, Boolean secret, Authentication auth){
         try {
             Optional<Comment> commentOptional = commentRepository.findById(id);
             Comment comment = commentOptional.get();
+            if(!auth.getName().equals(comment.getUser().getId())) return new ResponseBody<>(HttpStatus.BAD_REQUEST.value(), "권한이 없습니다.");
             comment.setSecret(secret);
             comment.setContent(content);
             comment.setModifiedDateTime(LocalDateTime.now());
